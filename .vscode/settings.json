@@ -1,0 +1,11 @@
+{
+    "cSpell.words": [
+        "Cubari",
+        "Kaguya",
+        "guya",
+        "pytest",
+        "venv"
+    ],
+    "python.pythonPath": "c:\\Users\\Pyreko\\Documents\\GitHub\\guya-selenium\\env\\Scripts\\python.exe",
+    "python.formatting.provider": "black"
+}
