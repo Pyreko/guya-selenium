@@ -20,6 +20,8 @@ TEXT_SEARCH_WORD = "cubari"
 TEXT_SEARCH_BROWSER_TITLE = "The 67th Student Council"
 TITLE_SEARCH_WORD = "Kaguya Wants to Eat"
 
+BROWSER_FIXTURES = [lazy_fixture("init_firefox"), lazy_fixture("init_chrome")]
+
 
 @pytest.fixture()
 def search_bar(browser: Union[webdriver.Firefox, webdriver.Chrome]):
@@ -108,9 +110,7 @@ def search_indexer(
         return []
 
 
-@pytest.mark.parametrize(
-    "browser", [lazy_fixture("init_firefox"), lazy_fixture("init_chrome")]
-)
+@pytest.mark.parametrize("browser", BROWSER_FIXTURES)
 def test_valid_title_search(browser, search_bar):
     """
     Tests getting results for a valid title search
@@ -125,9 +125,7 @@ def test_valid_title_search(browser, search_bar):
     assert len(results), "Could not find a result for a valid title search!"
 
 
-@pytest.mark.parametrize(
-    "browser", [lazy_fixture("init_firefox"), lazy_fixture("init_chrome")]
-)
+@pytest.mark.parametrize("browser", BROWSER_FIXTURES)
 def test_invalid_title_search(browser, search_bar):
     """
     Tests getting results for an invalid title search
@@ -142,9 +140,7 @@ def test_invalid_title_search(browser, search_bar):
     assert not len(results), "Found a result for an invalid title search!"
 
 
-@pytest.mark.parametrize(
-    "browser", [lazy_fixture("init_firefox"), lazy_fixture("init_chrome")]
-)
+@pytest.mark.parametrize("browser", BROWSER_FIXTURES)
 def test_valid_text_search(browser, search_bar):
     """
     Tests getting results for a valid text search
@@ -159,9 +155,7 @@ def test_valid_text_search(browser, search_bar):
     assert len(results), "Could not find a result for a valid text search!"
 
 
-@pytest.mark.parametrize(
-    "browser", [lazy_fixture("init_firefox"), lazy_fixture("init_chrome")]
-)
+@pytest.mark.parametrize("browser", BROWSER_FIXTURES)
 def test_invalid_text_search(browser, search_bar):
     """
     Tests getting results for an invalid text search
@@ -177,9 +171,7 @@ def test_invalid_text_search(browser, search_bar):
 
 
 # TODO: For all click results, might be better to not have to re-search?  idk.
-@pytest.mark.parametrize(
-    "browser", [lazy_fixture("init_firefox"), lazy_fixture("init_chrome")]
-)
+@pytest.mark.parametrize("browser", BROWSER_FIXTURES)
 def test_click_title_search_result(browser, search_bar):
     """
     Tests clicking the chapter result from searching for title
@@ -196,9 +188,7 @@ def test_click_title_search_result(browser, search_bar):
     assert TITLE_SEARCH_WORD in browser.title
 
 
-@pytest.mark.parametrize(
-    "browser", [lazy_fixture("init_firefox"), lazy_fixture("init_chrome")]
-)
+@pytest.mark.parametrize("browser", BROWSER_FIXTURES)
 def test_click_text_chapter_search_result(browser, search_bar):
     """
     Tests clicking the chapter result from searching for text
@@ -215,9 +205,7 @@ def test_click_text_chapter_search_result(browser, search_bar):
     assert TEXT_SEARCH_BROWSER_TITLE in browser.title
 
 
-@pytest.mark.parametrize(
-    "browser", [lazy_fixture("init_firefox"), lazy_fixture("init_chrome")]
-)
+@pytest.mark.parametrize("browser", BROWSER_FIXTURES)
 def test_click_text_page_search_result(browser, search_bar):
     """
     Tests clicking the page result from searching for text

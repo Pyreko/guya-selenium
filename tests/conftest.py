@@ -16,3 +16,11 @@ def init_chrome():
     driver = webdriver.Chrome()
     yield driver
     driver.quit()
+
+
+@yield_fixture(scope="module")
+def init_edge():
+    print("Initializing the Edge WD...")
+    driver = webdriver.Edge()
+    yield driver
+    driver.quit()
