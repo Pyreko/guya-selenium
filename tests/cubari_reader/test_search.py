@@ -5,12 +5,13 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 import pytest
-from pytest import lazy_fixture  # type: ignore
-from typing import List, Union
+from typing import List, NewType, Union
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.by import By
 import time
+from pytest import lazy_fixture  # type: ignore
 
+BROWSER_FIXTURES = [lazy_fixture("init_firefox"), lazy_fixture("init_chrome")]
 
 # Randomly selected page.  Shouldn't matter; just make sure that the route is still
 # correct in the future.
@@ -20,13 +21,17 @@ TEXT_SEARCH_WORD = "cubari"
 TEXT_SEARCH_BROWSER_TITLE = "The 67th Student Council"
 TITLE_SEARCH_WORD = "Kaguya Wants to Eat"
 
-BROWSER_FIXTURES = [lazy_fixture("init_firefox"), lazy_fixture("init_chrome")]
+DriverType = NewType("DriverType", Union[webdriver.Firefox, webdriver.Chrome])
 
 
 @pytest.mark.cubari_search
 class TestSearch:
+    """
+    Stuff for testing seorch
+    """
+
     @pytest.fixture()
-    def search_bar(self, browser: Union[webdriver.Firefox, webdriver.Chrome]):
+    def search_bar(self, browser: DriverType):
         browser.get(DEMO_CHAPTER)
         search_button = WebDriverWait(browser, 5).until(
             EC.visibility_of_element_located((By.CLASS_NAME, "search"))
@@ -51,10 +56,15 @@ class TestSearch:
             input_field.send_keys(q)
 
 
+@pytest.mark.parametrize("browser", BROWSER_FIXTURES)
 class TestChapterSearch(TestSearch):
+    """
+    Testing searching for chapters
+    """
+
     def search_chapter_title(
         self,
-        browser: Union[webdriver.Firefox, webdriver.Chrome],
+        browser: DriverType,
         search_bar: WebElement,
         query: str,
         locator_type: str,
@@ -87,10 +97,14 @@ class TestChapterSearch(TestSearch):
             # It's up to the test to handle this and work out if that's a failure/success.
             return []
 
-    @pytest.mark.parametrize("browser", BROWSER_FIXTURES)
     def test_valid(self, browser, search_bar):
         """
-        Tests getting results for a valid title search
+        Tests getting results for a valid title search.
+
+        ### Steps to replicate:
+        1. Open the search bar.
+        2. Type in <TITLE_SEARCH_WORD>, which we know will succeed in finding a result.
+        3. Pass if there is at least one result that matches the query.
         """
         results = self.search_chapter_title(
             browser,
@@ -101,10 +115,14 @@ class TestChapterSearch(TestSearch):
         )
         assert len(results), "Could not find a result for a valid title search!"
 
-    @pytest.mark.parametrize("browser", BROWSER_FIXTURES)
     def test_invalid(self, browser, search_bar):
         """
-        Tests getting results for an invalid title search
+        Tests getting results for an invalid title search.
+        
+        ### Steps to replicate:
+        1. Open the search bar.
+        2. Type in <INVALID_SEARCH_WORD>, which we know will fail in finding a result.
+        3. Pass if there are no results matching the query.
         """
         results = self.search_chapter_title(
             browser,
@@ -116,10 +134,15 @@ class TestChapterSearch(TestSearch):
         assert not len(results), "Found a result for an invalid title search!"
 
     # TODO: For all click results, might be better to not have to re-search?  idk.
-    @pytest.mark.parametrize("browser", BROWSER_FIXTURES)
     def test_click_result_chapter(self, browser, search_bar):
         """
-        Tests clicking the chapter result from searching for title
+        Tests clicking the chapter result from searching for title.
+                
+        ### Steps to replicate:
+        1. Open the search bar.
+        2. Type in <TITLE_SEARCH_WORD>, which we know will succeed in finding a result.
+        3. Click on the result.  Fail if none are found.
+        4. Ensure that the title of the page matches the intended target.
         """
         results = self.search_chapter_title(
             browser,
@@ -133,10 +156,15 @@ class TestChapterSearch(TestSearch):
         assert TITLE_SEARCH_WORD in browser.title
 
 
+@pytest.mark.parametrize("browser", BROWSER_FIXTURES)
 class TestIndexSearch(TestSearch):
+    """
+    Testing searching by index
+    """
+
     def search_indexer(
         self,
-        browser: Union[webdriver.Firefox, webdriver.Chrome],
+        browser: DriverType,
         search_bar: WebElement,
         query: str,
         locator_type: str,
@@ -174,10 +202,14 @@ class TestIndexSearch(TestSearch):
             # It's up to the test to handle this and work out if that's a failure/success.
             return []
 
-    @pytest.mark.parametrize("browser", BROWSER_FIXTURES)
     def test_valid(self, browser, search_bar):
         """
-        Tests getting results for a valid text search
+        Tests getting results for a valid text search.
+                
+        ### Steps to replicate:
+        1. Open the search bar.
+        2. Type in <TEXT_SEARCH_WORD>, which we know will succeed in finding a result.
+        3. Pass if there is at least one result matching the query.
         """
         results = self.search_indexer(
             browser,
@@ -188,10 +220,14 @@ class TestIndexSearch(TestSearch):
         )
         assert len(results), "Could not find a result for a valid text search!"
 
-    @pytest.mark.parametrize("browser", BROWSER_FIXTURES)
     def test_invalid(self, browser, search_bar):
         """
-        Tests getting results for an invalid text search
+        Tests getting results for an invalid text search.
+                        
+        ### Steps to replicate:
+        1. Open the search bar.
+        2. Type in <INVALID_SEARCH_WORD>, which we know will fail in finding a result.
+        3. Pass if there is no result matching the query.
         """
         results = self.search_indexer(
             browser,
@@ -202,10 +238,15 @@ class TestIndexSearch(TestSearch):
         )
         assert not len(results), "Found a result for an invalid text search!"
 
-    @pytest.mark.parametrize("browser", BROWSER_FIXTURES)
     def test_click_result_chapter(self, browser, search_bar):
         """
-        Tests clicking the chapter result from searching for text
+        Tests clicking the chapter result from searching for text.
+                        
+        ### Steps to replicate:
+        1. Open the search bar.
+        2. Type in <TEXT_SEARCH_WORD>, which we know will succeed in finding a result.
+        3. Click on the result.  Fail if none are found.
+        4. Ensure that the title of the page matches the intended target.
         """
         results = self.search_indexer(
             browser,
@@ -218,10 +259,15 @@ class TestIndexSearch(TestSearch):
         results[0].click()
         assert TEXT_SEARCH_BROWSER_TITLE in browser.title
 
-    @pytest.mark.parametrize("browser", BROWSER_FIXTURES)
     def test_click_result_page(self, browser, search_bar):
         """
-        Tests clicking the page result from searching for text
+        Tests clicking the page result from searching for text.
+                        
+        ### Steps to replicate:
+        1. Open the search bar.
+        2. Type in <TEXT_SEARCH_WORD>, which we know will succeed in finding a result.
+        3. Click on the page of the result.  Fail if none are found.
+        4. Ensure that the title of the page matches the intended target.
         """
         results = self.search_indexer(
             browser,
